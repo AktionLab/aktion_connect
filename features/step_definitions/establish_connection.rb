@@ -10,13 +10,9 @@ Given /^a config directory is setup$/ do
 end
 
 Given /^there is a service$/ do
-  unless defined? TestService
-    class TestService
-      def connect(config)
-      end
-    end
-  end
-  TestService.stub(:connect)
+  stub_const("TestService", Class.new)
+  @test_connection = TestService.new
+  TestService.stub(:connect).and_return(@test_connection)
 end
 
 Given /^the service has been configured$/ do
