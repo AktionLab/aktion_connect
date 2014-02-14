@@ -17,6 +17,13 @@ Feature: Connect to a confgiured service
     When a connection to the service is requested
     Then the service receives a connection request with the override config
 
+  Scenario: Establish a connection using a partial override config
+    Given the service has a default config
+    And the service has a partial override config
+    And the service has been configured
+    When a connection to the service is requested
+    Then the service receives a connection request with the partial override config
+
   Scenario: Establish a connection using an environment
     Given the service has a default config with environments
     And the service has been configured with a "test" environment
@@ -29,3 +36,10 @@ Feature: Connect to a confgiured service
     And the service has been configured with a "test" environment
     When a connection to the service is requested
     Then the service receives a connection request with the "test" override config
+
+  Scenario: Establish a connection using an override with environment
+    Given the service has a default config with environments
+    And the service has a partial override config with environments
+    And the service has been configured with a "test" environment
+    When a connection to the service is requested
+    Then the service receives a connection request with the "test" partial override config

@@ -44,6 +44,12 @@ Given /^the service has an override config$/ do
   YML
 end
 
+Given /^the service has a partial override config$/ do
+  File.write("config/test.yml", <<-YML)
+    user: 'ouser'
+  YML
+end
+
 Given /^the service has a default config with environments$/ do
   File.write('config/test.defaults.yml', <<-YML)
     development:
@@ -56,13 +62,22 @@ Given /^the service has a default config with environments$/ do
 end
 
 Given /^the service has an override config with environments$/ do
-  File.write('config/test.defaults.yml', <<-YML)
+  File.write('config/test.yml', <<-YML)
     development:
       user: 'odev_user'
       pass: 'odev_pass'
     test:
       user: 'otest_user'
       pass: 'otest_pass'
+  YML
+end
+
+Given /^the service has a partial override config with environments$/ do
+  File.write('config/test.yml', <<-YML)
+    development:
+      user: 'odev_user'
+    test:
+      user: 'otest_user'
   YML
 end
 
@@ -76,6 +91,10 @@ end
 
 Then /^the service receives a connection request with the override config$/ do
   TestService.should have_received(:connect).with({'user'=>'ouser','pass'=>'opass'})
+end
+
+Then /^the service receives a connection request with the partial override config$/ do
+  TestService.should have_received(:connect).with({'user'=>'ouser','pass'=>'pass'})
 end
 
 Then /^the service receives a connection request with the "([^"]+)" default config$/ do |env|
@@ -93,6 +112,16 @@ Then /^the service receives a connection request with the "([^"]+)" override con
     TestService.should have_received(:connect).with({'user'=>'odev_user','pass'=>'odev_pass'})
   elsif env == 'test'
     TestService.should have_received(:connect).with({'user'=>'otest_user','pass'=>'otest_pass'})
+  else
+    raise 'unknown env'
+  end
+end
+
+Then /^the service receives a connection request with the "([^"]+)" partial override config$/ do |env|
+  if env == 'development'
+    TestService.should have_received(:connect).with({'user'=>'odev_user','pass'=>'dev_pass'})
+  elsif env == 'test'
+    TestService.should have_received(:connect).with({'user'=>'otest_user','pass'=>'test_pass'})
   else
     raise 'unknown env'
   end
