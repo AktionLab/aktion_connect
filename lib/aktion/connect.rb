@@ -34,7 +34,7 @@ module Aktion
 
       def initialize(name, env, config_dir, &block)
         @name, @env, @config_dir, @proc = name, env, config_dir, block
-        load_config
+        @config = default_config.merge(override_config)
       end
 
       def connect
@@ -43,28 +43,20 @@ module Aktion
 
       private
 
-      def load_config
-        @config = default_config.merge(override_config)
-      end
-
       def default_config
-        if File.exists? config_dir.join("#{name}.defaults.yml")
-          if env
-            YAML.load_file(config_dir.join("#{name}.defaults.yml"))[env]
-          else
-            YAML.load_file(config_dir.join("#{name}.defaults.yml"))
-          end
-        else
-          {}
-        end
+        load_config("#{name}.defaults.yml")
       end
 
       def override_config
-        if File.exists? config_dir.join("#{name}.yml")
+        load_config("#{name}.yml")
+      end
+
+      def load_config(filename)
+        if File.exists? config_dir.join(filename)
           if env
-            YAML.load_file(config_dir.join("#{name}.yml"))[env]
+            YAML.load_file(config_dir.join(filename))[env]
           else
-            YAML.load_file(config_dir.join("#{name}.yml"))
+            YAML.load_file(config_dir.join(filename))
           end
         else
           {}
