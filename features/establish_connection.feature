@@ -1,4 +1,4 @@
-Feature: Connect to a confgiured service
+Feature: Connect to a service
 
   Background:
     Given there is a service
