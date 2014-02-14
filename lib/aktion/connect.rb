@@ -1,7 +1,13 @@
 require 'pathname'
 
+require 'byebug'
+
 module Aktion
   class Connect
+    class << self
+      attr_accessor :env
+    end
+
     def self.config_dir
       @config_dir
     end
@@ -16,7 +22,7 @@ module Aktion
 
     def self.register_service(name, &block)
       @services ||= {}
-      @services[name] = Service.new(name, 'development', config_dir, &block)
+      @services[name] = Service.new(name, env, config_dir, &block)
     end
 
     def self.connect(name)
@@ -42,8 +48,12 @@ module Aktion
       end
 
       def default_config
-        if File.exists? config_dir.join("#{name}.example.yml")
-          config_dir.join("#{name}.defaults.yml")[env]
+        if File.exists? config_dir.join("#{name}.defaults.yml")
+          if env
+            YAML.load_file(config_dir.join("#{name}.defaults.yml"))[env]
+          else
+            YAML.load_file(config_dir.join("#{name}.defaults.yml"))
+          end
         else
           {}
         end
@@ -51,7 +61,11 @@ module Aktion
 
       def override_config
         if File.exists? config_dir.join("#{name}.yml")
-          config_dir.join("#{name}.yml")
+          if env
+            YAML.load_file(config_dir.join("#{name}.yml"))[env]
+          else
+            YAML.load_file(config_dir.join("#{name}.yml"))
+          end
         else
           {}
         end

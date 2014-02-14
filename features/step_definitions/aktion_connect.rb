@@ -20,18 +20,43 @@ Given /^the service has been configured$/ do
   end
 end
 
+Given /^the service has been configured with a "([^"]+)" environment$/ do |env|
+  Aktion::Connect.env = env
+  step "the service has been configured"
+end
+
 Given /^the service has a default config$/ do
-  File.write('test.defaults.conf', <<-CONF)
+  File.write('config/test.defaults.yml', <<-YML)
+    user: 'user'
+    pass: 'pass'
+  YML
+end
+
+Given /^the service has a default config with environments$/ do
+  File.write('config/test.defaults.yml', <<-YML)
     development:
       user: 'dev_user'
       pass: 'dev_pass'
-  CONF
+    test:
+      user: 'test_user'
+      pass: 'test_pass'
+  YML
 end
 
 When /^a connection to the service is requested$/ do
   Aktion::Connect.connect('test')
 end
 
-Then /^the service receives a connection request$/ do
-  TestService.should have_received(:connect)
+Then /^the service receives a connection request with the default config$/ do
+  TestService.should have_received(:connect).with({'user'=>'user','pass'=>'pass'})
+end
+
+Then /^the service receives a connection request with the "([^"]+)" default config$/ do |env|
+  if env == 'development'
+    TestService.should have_received(:connect).with({'user'=>'dev_user','pass'=>'dev_pass'})
+  elsif env == 'test'
+    TestService.should have_received(:connect).with({'user'=>'test_user','pass'=>'test_pass'})
+  else
+    raise 'unknown env'
+  end
 end
