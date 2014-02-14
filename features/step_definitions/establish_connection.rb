@@ -1,6 +1,6 @@
 After do
   FileUtils.rm_r('config') if Dir.exists?('config')
-  Aktion::Connect.env = nil
+  Aktion::Connect.reset
 end
 
 Given /^a config directory is setup$/ do
@@ -13,6 +13,7 @@ Given /^there is a service$/ do
   stub_const("TestService", Class.new)
   @test_connection = TestService.new
   TestService.stub(:connect).and_return(@test_connection)
+  @test_connection.stub(:close)
 end
 
 Given /^the service has been configured$/ do

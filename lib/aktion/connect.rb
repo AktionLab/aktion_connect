@@ -8,6 +8,14 @@ module Aktion
       attr_accessor :env
     end
 
+    def self.reset
+      @services = {}
+      @connections = {}
+      @config_dir = nil
+      @env = nil
+    end
+    reset
+
     def self.config_dir
       @config_dir
     end
@@ -21,12 +29,15 @@ module Aktion
     end
 
     def self.register_service(name, &block)
-      @services ||= {}
       @services[name] = Service.new(name, env, config_dir, &block)
     end
 
     def self.connect(name)
-      @services[name].connect
+      @connections[name] ||= @services[name].connect
+    end
+
+    def self.close(name)
+      @connections[name].close
     end
 
     class Service
