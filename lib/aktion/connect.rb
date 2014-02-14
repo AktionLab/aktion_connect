@@ -28,28 +28,40 @@ module Aktion
       @configs
     end
 
-    def self.register_service(name, &block)
-      @services[name] = Service.new(name, env, config_dir, &block)
+    def self.register_service(name, opts={}, &block)
+      @services[name] = Service.new(name, env, config_dir, opts, &block)
     end
 
     def self.connect(name)
-      @connections[name] ||= @services[name].connect
+      @services[name].connect
     end
 
     def self.close(name)
-      @connections[name].close
+      @services[name].close
     end
 
     class Service
       attr_reader :name, :env, :config_dir, :config
 
-      def initialize(name, env, config_dir, &block)
-        @name, @env, @config_dir, @proc = name, env, config_dir, block
-        @config = default_config.merge(override_config)
+      DEFAULT_OPTS = {
+        close_method: :close
+      }
+
+      def initialize(name, env, config_dir, opts={}, &block)
+        @name       = name
+        @env        = env
+        @config_dir = config_dir
+        @opts       = DEFAULT_OPTS.merge(opts)
+        @proc       = block
+        @config     = default_config.merge(override_config)
       end
 
       def connect
-        @proc.call(@config)
+        @connection ||= @proc.call(@config)
+      end
+
+      def close
+        @connection.send(@opts[:close_method])
       end
 
       private
