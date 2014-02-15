@@ -19,44 +19,113 @@ Or install it yourself as:
 
 ## Usage
 
-### Defining a service
+### Registering a service
 
-Here we show an example of setting up a simple redis connection.
+In order to use the interface to manage connections to services
+they must first be registered. This will provide some necessary
+information for interfacing with the underlying service.
 
-First define the service for redis and set the config directory.
+By default register service assumes 3 conventions:
+- The service class name is the caps-case version of the service name
+  (ie. `some_service` becomes `SomeService`
+- The service accepts a call to connect to establish a connection
+- The service accepts a call to disconnect to drop a connection
 
-    Aktion::Connect.config_dir = 'config'
-    
-    Aktion::Connect.register_service('redis') do |config|
-      Redis.new(config)
+All of these conventions can be overriden by supplying an options
+hash as a second argument. Alternatively a block can be passed
+to handle more complex connection scenarios.
+
+The following examples will show a class definition folowed
+by the service registration required to make it work.
+
+#### Register a service using all defaults
+
+    class SomeService
+      def self.connect(config)
+      end
+
+      def disconnect
+      end
     end
 
-Next define a defaults config file, this file is useful to check into
-version control to supply a set of defaults that will work in most dev
-environments.
+    Aktion::Connect.register_service('some_service')
 
-    # config/redis.defaults.yml
-    development:
-      host: 'localhost'
-      port: 6379
-      db: 0
-    test:
-      host: 'localhost'
-      port: 6379
-      db: 1
+#### Register a service that specifies a class name
 
-Additionally, an override config can be specified to alter part or all
-of the default configuration. For example if a developer was using port
-6380 for their redis they can override the port only.
+    module Some
+      class Service
+        def self.connect(config)
+        end
 
-    # config/redis.yml
-    development:
-      port: 6380
-    test:
-      port: 6380
+        def disconnect
+        end
+      end
+    end
 
-It is best to add this to any ignore files so that overrides can be managed
-locally.
+    Aktion::Connect.resgiter_service('some_service', service_class: Some::Service)
+
+#### Register a service that uses different connect/disconnect methods
+
+    class SomeService
+      def self.open
+      end
+
+      def close
+      end
+    end
+
+    Aktion::Connect.register_service('some_service', connect_method: 'open', disconnect_method: 'close')
+
+#### Register a service that uses a block to handle connections
+
+    class SomeService
+      def connect(host, port)
+      end
+
+      def login(user, pass)
+      end
+
+      def disconnect
+      end
+    end
+
+    Aktion::Connect.register_service('some_service') do |config|
+      SomeService.new.tap do |service|
+        service.connect(config[:host], config[:port])
+        service.login(config[:user], config[:pass])
+      end
+    end
+
+When using a block, it's important to note that the instance of the connected
+service needs to be returned so the interface can manage it.
+
+### Manage configuration files
+
+In many projects configuration files use mostly standard settings for services
+that they connect to, although in some cases it is necessary for each instance
+of the project to contain local overrides for things such as username/password
+or even host/ip/port when dealing with a deployment. For this reason this
+library uses a combination of a defaults file that is meant to be checked into
+version control, and a local override file that is ignored by version control
+to allow customization as necessary.
+
+The first step is specifying the directory where config files are located. This
+needs to be done before registering any services. This can be a relative or
+absolute path.
+
+    Aktion::Connect.config_dir = 'config'
+
+Once that is done all config files will be resolved with this setting and the
+name of the service. Using our example services above, the two files that
+are looked for are
+
+    config/some_service.defaults.yml
+    config/some_service.yml
+
+In multi-environment projects it is necessary to set the environment before
+declaring services which can be done similar to setting the `config_dir`.
+
+    Aktion::Connect.env = 'development'
 
 ### Using a service
 
