@@ -52,6 +52,11 @@ When /^a connection to the service is requested$/ do
   Aktion::Connect.connect('test_service')
 end
 
+When /^a connection to the service is requested twice$/ do
+  @connection1 = Aktion::Connect.connect('test_service')
+  @connection2 = Aktion::Connect.connect('test_service')
+end
+
 When /^a connection to the service is requested with a different service name$/ do
   Aktion::Connect.connect('test')
 end
@@ -62,4 +67,12 @@ end
 
 Then /^the service receives a connection request to open$/ do
   TestService.should have_received(:open)
+end
+
+Then /^the service receives a connection request once$/ do
+  TestService.should have_received(:connect).once
+end
+
+Then /^the request returns the same connection$/ do
+  @connection1.should equal @connection2
 end

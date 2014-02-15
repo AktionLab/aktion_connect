@@ -27,3 +27,10 @@ Feature: Connect to a service
     And the service has been configured with a different service name
     When a connection to the service is requested with a different service name
     Then the service receives a connection request
+
+  Scenario: Requesting a connection twice returns the same connection
+    Given the service has a default config
+    And the service has been configured
+    When a connection to the service is requested twice
+    Then the service receives a connection request once
+    And the request returns the same connection
