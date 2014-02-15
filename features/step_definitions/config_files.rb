@@ -5,6 +5,13 @@ Given /^the service has a default config$/ do
   YML
 end
 
+Given /^the service has a default config with a different service name$/ do
+  File.write('config/test.defaults.yml', <<-YML)
+    user: 'user'
+    pass: 'pass'
+  YML
+end
+
 Given /^the service has an override config$/ do
   File.write("config/test_service.yml", <<-YML)
     user: 'ouser'

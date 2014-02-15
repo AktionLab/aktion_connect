@@ -63,7 +63,7 @@ module Aktion
           unless @proc.nil?
             @proc.call(@config)
           else
-            service_class.send(@opts[:connect_method], @config)
+            service_class.public_send(@opts[:connect_method], @config)
           end
       end
 
