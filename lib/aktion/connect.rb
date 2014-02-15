@@ -1,4 +1,5 @@
 require 'pathname'
+require 'active_support/inflector'
 
 require 'byebug'
 
@@ -44,7 +45,8 @@ module Aktion
       attr_reader :name, :env, :config_dir, :config
 
       DEFAULT_OPTS = {
-        close_method: :close
+        close_method: :close,
+        connect_method: :connect
       }
 
       def initialize(name, env, config_dir, opts={}, &block)
@@ -57,7 +59,12 @@ module Aktion
       end
 
       def connect
-        @connection ||= @proc.call(@config)
+        @connection ||=
+          unless @proc.nil?
+            @proc.call(@config)
+          else
+            service_class.send(@opts[:connect_method], @config)
+          end
       end
 
       def close
@@ -65,6 +72,10 @@ module Aktion
       end
 
       private
+
+      def service_class
+        @opts[:service_class] ||= name.classify.constantize
+      end
 
       def default_config
         load_config("#{name}.defaults.yml")

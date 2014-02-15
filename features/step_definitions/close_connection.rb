@@ -2,13 +2,13 @@ Given /^the service has been configured with a disconnect close method$/ do
   @test_connection.unstub(:close)
   @test_connection.stub(:disconnect)
 
-  Aktion::Connect.register_service('test', close_method: 'disconnect') do |config|
+  Aktion::Connect.register_service('test_service', close_method: 'disconnect') do |config|
     TestService.connect(config)
   end
 end
 
 When /^the connection is closed$/ do
-  Aktion::Connect.close('test')
+  Aktion::Connect.close('test_service')
 end
 
 Then /^the service receives a close connection$/ do

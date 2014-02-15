@@ -43,3 +43,9 @@ Feature: Connect to a service
     And the service has been configured with a "test" environment
     When a connection to the service is requested
     Then the service receives a connection request with the "test" partial override config
+
+  Scenario: Establish a connection using a connect method by default
+    Given the service has a default config
+    And the service has been configured without a block
+    When a connection to the service is requested
+    Then the service receives a connection request

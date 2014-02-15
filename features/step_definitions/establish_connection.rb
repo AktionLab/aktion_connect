@@ -17,9 +17,13 @@ Given /^there is a service$/ do
 end
 
 Given /^the service has been configured$/ do
-  Aktion::Connect.register_service('test') do |config|
+  Aktion::Connect.register_service('test_service') do |config|
     TestService.connect(config)
   end
+end
+
+Given /^the service has been configured without a block$/ do
+  Aktion::Connect.register_service('test_service')
 end
 
 Given /^the service has been configured with a "([^"]+)" environment$/ do |env|
@@ -28,27 +32,27 @@ Given /^the service has been configured with a "([^"]+)" environment$/ do |env|
 end
 
 Given /^the service has a default config$/ do
-  File.write('config/test.defaults.yml', <<-YML)
+  File.write('config/test_service.defaults.yml', <<-YML)
     user: 'user'
     pass: 'pass'
   YML
 end
 
 Given /^the service has an override config$/ do
-  File.write("config/test.yml", <<-YML)
+  File.write("config/test_service.yml", <<-YML)
     user: 'ouser'
     pass: 'opass'
   YML
 end
 
 Given /^the service has a partial override config$/ do
-  File.write("config/test.yml", <<-YML)
+  File.write("config/test_service.yml", <<-YML)
     user: 'ouser'
   YML
 end
 
 Given /^the service has a default config with environments$/ do
-  File.write('config/test.defaults.yml', <<-YML)
+  File.write('config/test_service.defaults.yml', <<-YML)
     development:
       user: 'dev_user'
       pass: 'dev_pass'
@@ -59,7 +63,7 @@ Given /^the service has a default config with environments$/ do
 end
 
 Given /^the service has an override config with environments$/ do
-  File.write('config/test.yml', <<-YML)
+  File.write('config/test_service.yml', <<-YML)
     development:
       user: 'odev_user'
       pass: 'odev_pass'
@@ -70,7 +74,7 @@ Given /^the service has an override config with environments$/ do
 end
 
 Given /^the service has a partial override config with environments$/ do
-  File.write('config/test.yml', <<-YML)
+  File.write('config/test_service.yml', <<-YML)
     development:
       user: 'odev_user'
     test:
@@ -79,7 +83,11 @@ Given /^the service has a partial override config with environments$/ do
 end
 
 When /^a connection to the service is requested$/ do
-  Aktion::Connect.connect('test')
+  Aktion::Connect.connect('test_service')
+end
+
+Then /^the service receives a connection request$/ do
+  TestService.should have_received(:connect)
 end
 
 Then /^the service receives a connection request with the default config$/ do
