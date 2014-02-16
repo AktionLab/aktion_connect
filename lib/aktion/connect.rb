@@ -1,8 +1,6 @@
 require 'pathname'
 require 'active_support/inflector'
 
-require 'byebug'
-
 module Aktion
   class Connect
     class << self
