@@ -72,7 +72,7 @@ module Aktion
       private
 
       def service_class
-        @opts[:service_class] ||= name.classify.constantize
+        @opts[:service_class] ||= name.camelize.constantize
       end
 
       def default_config
