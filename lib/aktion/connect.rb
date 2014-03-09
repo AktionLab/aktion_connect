@@ -35,15 +35,15 @@ module Aktion
       @services[name].connect
     end
 
-    def self.close(name)
-      @services[name].close
+    def self.disconnect(name)
+      @services[name].disconnect
     end
 
     class Service
       attr_reader :name, :env, :config_dir, :config
 
       DEFAULT_OPTS = {
-        close_method: :close,
+        disconnect_method: :disconnect,
         connect_method: :connect
       }
 
@@ -65,8 +65,8 @@ module Aktion
           end
       end
 
-      def close
-        @connection.send(@opts[:close_method])
+      def disconnect
+        @connection.send(@opts[:disconnect_method])
       end
 
       private

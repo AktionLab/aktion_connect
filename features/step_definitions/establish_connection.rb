@@ -13,7 +13,7 @@ Given /^there is a service$/ do
   stub_const("TestService", Class.new)
   @test_connection = TestService.new
   TestService.stub(:connect).and_return(@test_connection)
-  @test_connection.stub(:close)
+  @test_connection.stub(:disconnect)
 end
 
 Given /^the service has been configured$/ do

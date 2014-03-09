@@ -11,10 +11,10 @@ Feature: Close a connection
     Given the service has been configured
     When a connection to the service is requested
     And the connection is closed
-    Then the service receives a close connection
+    Then the service receives a disconnect connection
 
   Scenario: Close a connection to a service that has a different close method
-    Given the service has been configured with a disconnect close method
+    Given the service has been configured with a close method
     When a connection to the service is requested
     And the connection is closed
-    Then the service receives a disconnect connection
+    Then the service receives a close connection
